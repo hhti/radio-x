@@ -1,10 +1,8 @@
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import { IconCamera, IconDeviceLaptop, IconMaximize } from '@tabler/icons';
-import config from 'config';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { backendLocal } from 'services';
 import { SET_BORDER_RADIUS, SET_FONT_FAMILY } from 'store/actions';
 
 // constant
@@ -69,26 +67,6 @@ const Customization = () => {
     }
     dispatch({ type: SET_FONT_FAMILY, fontFamily: newFont });
   }, [dispatch, fontFamily]);
-
-  const handleClickScreenButtonHotKey = () => {
-    backendLocal
-      .get(config.pathBaseUrl + '/executesnippingtoohotkey')
-      .then((res) => {
-        console.log(res.data);
-      });
-  };
-
-  const handleClickOpenProgram = () => {
-    backendLocal.get('/executesnippingtool').then((res) => {
-      console.log(res.data);
-    });
-  };
-
-  const handleClickOpenPromptAtpf = () => {
-    backendLocal.get('/executeprompt').then((res) => {
-      console.log(res.data);
-    });
-  };
 
   return (
     <></>

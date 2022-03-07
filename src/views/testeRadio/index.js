@@ -13,12 +13,12 @@ import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
-import axios from 'axios';
 import { Buffer } from 'buffer/';
 import React, { useRef, useState } from 'react';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
 import mp3_file_1 from '../../audiosRadio/Anomalous Hedges - The Mini Vandals.mp3';
+import { apiSpotify } from '../../services';
 
 const CLIENT_ID = '559b706675da46a088b20c69f8b36e61';
 const CLIENT_SECRET = 'c080da0fdc0d44ed88e775c40168ebde';
@@ -34,8 +34,8 @@ const refreshToken = async () => {
     refresh_token
   });
 
-  const response = await axios.post('https://accounts.spotify.com/api/token', params, {
-    headers: { 
+  const response = await apiSpotify.post('https://accounts.spotify.com/api/token', params, {
+    headers: {
       Authorization: `Basic ${Buffer.from(
         `${CLIENT_ID}:${CLIENT_SECRET}`
       ).toString('base64')}`
@@ -46,17 +46,17 @@ const refreshToken = async () => {
 
   window.localStorage.setItem('token', JSON.stringify({ access_token, refresh_token: new_refresh_token }));
 
-  axios.defaults.headers['Authorization'] = `Bearer ${access_token}`;
+  apiSpotify.defaults.headers['Authorization'] = `Bearer ${access_token}`;
 
   return access_token;
 }
 
-axios.interceptors.response.use(null, async (error) => {
-  if(error.response.status === 401) {
+apiSpotify.interceptors.response.use(null, async (error) => {
+  if (error.response.status === 401) {
     const token = await refreshToken();
     error.config.headers['Authorization'] = `Bearer ${token}`;
-    
-    return axios.request(error.config);
+
+    return apiSpotify.request(error.config);
   }
 
   return Promise.reject(error);
@@ -156,11 +156,23 @@ export default function TesteRadio() {
   };
 
   const handleClickPlayList = (index, uri) => async () => {
+
+    const { data: { devices } } = await apiSpotify.get('/me/player/devices');
+
+    const filteredDevices = devices.filter(({ type }) => type === 'Computer');
+
+    if (!filteredDevices.length) {
+      return;
+    }
+
     setSelectedPlayListIndex(index);
 
-    await axios.put('https://api.spotify.com/v1/me/player/play', {
+    const { id } = filteredDevices[0];
+
+    await apiSpotify.put(`/me/player/play?device_id=${id}`, {
       context_uri: uri,
     });
+
   };
 
   React.useEffect(() => {
@@ -169,7 +181,7 @@ export default function TesteRadio() {
 
     if (token) {
       setIsLogged(true);
-      axios.defaults.headers['Authorization'] = `Bearer ${token.access_token}`;
+      apiSpotify.defaults.headers['Authorization'] = `Bearer ${token.access_token}`;
       return;
     }
 
@@ -183,7 +195,7 @@ export default function TesteRadio() {
           grant_type: 'authorization_code',
         });
 
-        const response = await axios.post(
+        const response = await apiSpotify.post(
           'https://accounts.spotify.com/api/token',
           params,
           {
@@ -197,7 +209,7 @@ export default function TesteRadio() {
 
         const { access_token, refresh_token } = response.data;
 
-        axios.defaults.headers['Authorization'] = `Bearer ${access_token}`;
+        apiSpotify.defaults.headers['Authorization'] = `Bearer ${access_token}`;
 
         window.localStorage.setItem(
           'token',
@@ -221,8 +233,8 @@ export default function TesteRadio() {
           data: { context },
         },
       ] = await Promise.all([
-        axios.get('https://api.spotify.com/v1/me/playlists'),
-        axios.get('https://api.spotify.com/v1/me/player/currently-playing'),
+        apiSpotify.get('/me/playlists'),
+        apiSpotify.get('/me/player/currently-playing'),
       ]);
 
       const playlists = data.items.map(({ id, name, uri }) => ({
