@@ -6,7 +6,7 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
+  ListItemText
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -262,6 +262,7 @@ export default function TesteRadio() {
 
     if (isLogged) {
       fetchData();
+      return;
     }
 
     setPlaylists([]);
