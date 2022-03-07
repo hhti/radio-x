@@ -18,7 +18,7 @@
     "source.organizeImports": true
   },
   "editor.formatOnSave": true,
-"[html]": {
+  "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
-}
+  }
 }

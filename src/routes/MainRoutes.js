@@ -13,42 +13,41 @@ const MainPageRadio = Loadable(lazy(() => import('views/mainPageRadio')));
 const Uploads = Loadable(lazy(() => import('views/uploads')));
 const ListarAudios = Loadable(lazy(() => import('views/listarAudios')));
 
-
 // ==============================|| PRINCIPAIS ROTAS ||============================== //
 
 const MainRoutes = {
-    path: '/',
-    element: <MainLayout />,
-    children: [
-        {
-            path: '/',
-            element: <TesteRadio />
-        },
-        {
-            path: '/sobre',
-            element: <Sobre />
-        },
-        {
-            path: '/main',
-            element: <MainPageRadio />
-        },
-        {
-            path: '/testeRadio',
-            element: <TesteRadio />
-        },
-        {
-            path: '/mainpage',
-            element: <MainPageRadio />
-        },
-        {
-            path: '/uploads',
-            element: <Uploads />
-        },
-        {
-            path: '/listarAudios',
-            element: <ListarAudios />
-        }
-    ]
+  path: '/',
+  element: <MainLayout />,
+  children: [
+    {
+      path: '/',
+      element: <TesteRadio />,
+    },
+    {
+      path: '/sobre',
+      element: <Sobre />,
+    },
+    {
+      path: '/main',
+      element: <MainPageRadio />,
+    },
+    {
+      path: '/testeRadio',
+      element: <TesteRadio />,
+    },
+    {
+      path: '/mainpage',
+      element: <MainPageRadio />,
+    },
+    {
+      path: '/uploads',
+      element: <Uploads />,
+    },
+    {
+      path: '/listarAudios',
+      element: <ListarAudios />,
+    },
+  ],
 };
 
 export default MainRoutes;
