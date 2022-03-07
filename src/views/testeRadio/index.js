@@ -6,7 +6,7 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -31,25 +31,32 @@ const refreshToken = async () => {
 
   const params = new URLSearchParams({
     grant_type: 'refresh_token',
-    refresh_token
+    refresh_token,
   });
 
-  const response = await apiSpotify.post('https://accounts.spotify.com/api/token', params, {
-    headers: {
-      Authorization: `Basic ${Buffer.from(
-        `${CLIENT_ID}:${CLIENT_SECRET}`
-      ).toString('base64')}`
+  const response = await apiSpotify.post(
+    'https://accounts.spotify.com/api/token',
+    params,
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(
+          `${CLIENT_ID}:${CLIENT_SECRET}`
+        ).toString('base64')}`,
+      },
     }
-  });
+  );
 
   const { access_token, refresh_token: new_refresh_token } = response.data;
 
-  window.localStorage.setItem('token', JSON.stringify({ access_token, refresh_token: new_refresh_token }));
+  window.localStorage.setItem(
+    'token',
+    JSON.stringify({ access_token, refresh_token: new_refresh_token })
+  );
 
   apiSpotify.defaults.headers['Authorization'] = `Bearer ${access_token}`;
 
   return access_token;
-}
+};
 
 apiSpotify.interceptors.response.use(null, async (error) => {
   if (error.response.status === 401) {
@@ -156,8 +163,9 @@ export default function TesteRadio() {
   };
 
   const handleClickPlayList = (index, uri) => async () => {
-
-    const { data: { devices } } = await apiSpotify.get('/me/player/devices');
+    const {
+      data: { devices },
+    } = await apiSpotify.get('/me/player/devices');
 
     const filteredDevices = devices.filter(({ type }) => type === 'Computer');
 
@@ -172,7 +180,6 @@ export default function TesteRadio() {
     await apiSpotify.put(`/me/player/play?device_id=${id}`, {
       context_uri: uri,
     });
-
   };
 
   React.useEffect(() => {
@@ -181,7 +188,9 @@ export default function TesteRadio() {
 
     if (token) {
       setIsLogged(true);
-      apiSpotify.defaults.headers['Authorization'] = `Bearer ${token.access_token}`;
+      apiSpotify.defaults.headers[
+        'Authorization'
+      ] = `Bearer ${token.access_token}`;
       return;
     }
 
