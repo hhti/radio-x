@@ -18,10 +18,12 @@ import { Buffer } from 'buffer/';
 import React, { useRef, useState } from 'react';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
-import mp3_file_1 from '../../audiosRadio/Anomalous Hedges - The Mini Vandals.mp3';
+// import mp3_file_1 from '../../audiosRadio/Anomalous Hedges - The Mini Vandals.mp3';
 
-const CLIENT_ID = '559b706675da46a088b20c69f8b36e61';
-const CLIENT_SECRET = 'c080da0fdc0d44ed88e775c40168ebde';
+// const CLIENT_ID = '559b706675da46a088b20c69f8b36e61';
+// const CLIENT_SECRET = 'c080da0fdc0d44ed88e775c40168ebde';
+const CLIENT_ID = 'd16141272a964643b5d55e71ea6d992c';
+const CLIENT_SECRET = 'bbb152370c624c9bbdd10f1fbf27d979';
 const REDIRECT_URI = 'http://localhost:3000/testeRadio';
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'code';
@@ -290,7 +292,8 @@ export default function TesteRadio() {
       )}
 
       <Card sx={{ overflow: 'hidden' }}>
-        <audio src={mp3_file_1} ref={audioPlayer} onTimeUpdate={onPlaying}>
+        {/* <audio src={mp3_file_1} ref={audioPlayer} onTimeUpdate={onPlaying}> */}
+        <audio src='' ref={audioPlayer} onTimeUpdate={onPlaying}>
           Your browser does not support the
           <code>audio</code> element.
         </audio>

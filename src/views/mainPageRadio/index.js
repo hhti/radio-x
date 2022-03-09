@@ -6,10 +6,10 @@ import MainCard from 'ui-component/cards/MainCard';
 // ==============================|| SOBRE O ATPF ||============================== //
 
 const MainPageRadio = () => (
-  <MainCard title="Radio X">
+  <MainCard title="Radio Eleva">
     <Grid container justifyContent="center">
       <img
-        src="https://www.imagensempng.com.br/wp-content/uploads/2021/07/04-17.png"
+        src="http://elevaescalada.com.br/wp-content/uploads/2020/07/Sa%C3%ADdas-de-marca_Eleva_oficiais-05-2048x1448.png"
         alt="radioX"
         loading="lazy"
         width="500"
