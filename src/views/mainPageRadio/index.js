@@ -14,7 +14,7 @@ const MainPageRadio = () => (
         src={logo}
         alt="radioX"
         loading="lazy"
-        width="540"
+        width="570"
         height="200"
       />
     </Grid>

@@ -1,6 +1,12 @@
 import { PlaylistPlay } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import LinkIcon from '@mui/icons-material/Link';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PauseCircleIcon from '@mui/icons-material/PauseCircle';
+import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
+import SettingsPowerIcon from '@mui/icons-material/SettingsPower';
+import StopIcon from '@mui/icons-material/Stop';
+import VolumeDownIcon from '@mui/icons-material/VolumeDown';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import {
   Card,
   List,
@@ -9,13 +15,15 @@ import {
   ListItemText
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
+import axios from 'axios';
 import { Buffer } from 'buffer/';
 import React, { useRef, useState } from 'react';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
 import { apiSpotify } from '../../services';
 
@@ -70,6 +78,8 @@ apiSpotify.interceptors.response.use(null, async (error) => {
 });
 
 export default function TesteRadio() {
+  const urlServer = 'http://localhost:3005'
+
   const audioPlayer = useRef();
   const [currentTime, setCurrentTime] = useState(0);
   const [seekValue, setSeekValue] = useState(0);
@@ -80,6 +90,39 @@ export default function TesteRadio() {
   const [isLogged, setIsLogged] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylistIndex, setSelectedPlayListIndex] = useState(-1);
+  const [audio, setAudio] = React.useState("");
+  const [time, setTime] = React.useState(30);
+  const [audiosFile, setAudiosFile] = useState({});
+
+  const closeMessage =()=>{
+    let count = 0;
+
+    const interval = setInterval(() => {
+      count++;
+
+      if (count === 2) {
+        clearInterval(interval);
+        setOpen(false);
+      }
+
+    }, 2000);
+  }
+
+
+  const handleSwitchingSongs =()=>{
+    //selectedPlaylistIndex 
+  }
+  
+  const handleChange = (event) => {
+    setAudio(event.target.value);
+    console.log(event.target.value)
+  };
+
+  const handleChangeTIme = (event) => {
+    setTime(event.target.value);
+    console.log(event.target.value)
+  };
+
 
   const play = () => {
     audioPlayer.current.play();
@@ -100,7 +143,6 @@ export default function TesteRadio() {
 
   const setVolumePlus = (volume) => {
     console.log(valueVolume);
-
     if (valueVolume >= '0.99') {
       setAlertType('success');
       setAlertName('Volume máximo');
@@ -123,6 +165,7 @@ export default function TesteRadio() {
       audioPlayer.current.volume = valueVolume;
     }
   };
+  
   const setVolumeLess = (volume) => {
     if (valueVolume <= '0.1') {
       setAlertType('success');
@@ -231,8 +274,17 @@ export default function TesteRadio() {
       };
 
       fetchToken();
+
     }
+
   }, []);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    console.log(event)
+
+  }  
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -269,15 +321,50 @@ export default function TesteRadio() {
     setSelectedPlayListIndex(-1);
   }, [isLogged]);
 
+  React.useEffect(() => {
+    const getAudios = async () => {
+      
+      try {
+        const res = await axios.get(urlServer+"/getAudios" );
+        setAudiosFile(res.data);
+        setAudio(Object.keys(res.data)[0]);
+        stop();
+  
+      } catch (ex) {
+        setAlertType('error');
+        setAlertName('Contacte o Administrador !!!');
+        setOpen(true);
+        closeMessage();
+        console.log(ex);
+      }
+    }
+
+    getAudios();
+    
+    if (isLogged) {
+      getAudios();
+      return;
+    }
+    
+  },[]);
+
+  React.useEffect(() => { 
+  }, [audio]); 
+
   return (
     <MainCard
-      title="Radio"
-      secondary={
-        <SecondaryAction
-          icon={<LinkIcon fontSize="small" />}
-          link="https://open.spotify.com/embed/album/5WCVs6FJvyIH9Zr0ZVGmge?utm_source=generator"
-        />
-      }
+      title="Radio Eleva"
+      secondary=
+        {!isLogged ?(
+
+        <IconButton color="primary" aria-label="Loggin Spotify"  href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state`}>
+          <SettingsPowerIcon />
+        </IconButton>
+        ) : (
+        <IconButton color="primary" onClick={logout} title= "Logout Spotify" aria-label="Logout Spotify">
+          <LogoutIcon />
+        </IconButton>
+        )}
     >
       <Collapse in={open}>
         <Alert
@@ -301,24 +388,10 @@ export default function TesteRadio() {
         </Alert>
       </Collapse>
 
-      {!isLogged ? (
-        <a
-          href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state`}
-        >
-          Login to Spotify
-        </a>
-      ) : (
-        <button onClick={logout}>Logout</button>
-      )}
-
       <Card sx={{ overflow: 'hidden' }}>
-        {/* <audio src={mp3_file_1} ref={audioPlayer} onTimeUpdate={onPlaying}> */}
-        <audio src='' ref={audioPlayer} onTimeUpdate={onPlaying}>
-          Your browser does not support the
-          <code>audio</code> element.
-        </audio>
 
-        {/* <p>{currentTime}</p> */}
+        <audio ref={audioPlayer} src={urlServer+'/audio/'+audio} autoPlay onTimeUpdate={onPlaying}/>
+
         <input
           type="range"
           min="0"
@@ -332,35 +405,69 @@ export default function TesteRadio() {
             setSeekValue(e.target.value);
           }}
         />
-        <Stack spacing={2} direction="row">
-          <Button variant="contained" onClick={play}>
-            play
-          </Button>
-          <Button variant="contained" onClick={pause}>
-            pause
-          </Button>
-          <Button variant="contained" onClick={stop}>
-            stop
-          </Button>
-          <Button variant="contained" onClick={() => setSpeed(0.5)}>
-            0.5x
-          </Button>
-          <Button variant="contained" onClick={() => setSpeed(1)}>
-            1x
-          </Button>
-          <Button variant="contained" onClick={() => setSpeed(1.5)}>
-            1.5x
-          </Button>
-          <Button variant="contained" onClick={() => setSpeed(2)}>
-            2x
-          </Button>
-          <Button variant="contained" onClick={() => setVolumePlus(0.1)}>
-            +
-          </Button>
-          <Button variant="contained" onClick={() => setVolumeLess(0.1)}>
-            -
-          </Button>
+
+        <Stack spacing={1} direction="row">
+          <IconButton aria-label="less" title='Abaixar volume' onClick={() => setVolumeLess(0.1)}>
+            <VolumeDownIcon />
+          </IconButton>
+
+          <IconButton aria-label="play" title='play' onClick={play}>
+            <PlayCircleFilledWhiteIcon />
+          </IconButton>
+
+          <IconButton aria-label="pause" title='pause' onClick={pause}>
+            <PauseCircleIcon />
+          </IconButton>
+
+          <IconButton aria-label="stop" title='stop' onClick={stop}>
+            <StopIcon />
+          </IconButton>
+
+          <IconButton aria-label="plus" title='Aumentar volume' onClick={() => setVolumePlus(0.1)}>
+            <VolumeUpIcon />
+          </IconButton>
         </Stack>
+
+
+        <Stack spacing={2} direction="row" sx={{ m: 1, minWidth: 180 }}>
+      {/* <FormControl onSubmit={handleSubmit} sx={{ m: 1, minWidth: 180 }}> */}
+        <InputLabel id="demo-simple-select-label" 
+                 sx={{
+                  '& .MuiTextField-root': { m: 1, width: '25ch' },
+                  '& .MuiButton-root': { m: 1, width: '20ch' },
+                  '& .MuiInputLabel-root': { m: 1, width: '60ch' },
+                }}
+        
+        >Áudios:</InputLabel>
+
+        <Select
+          labelId="audio"
+          id="id_audio"
+          value={audio}
+          label="Audio"
+          onChange={handleChange}
+        >
+        {Object.entries(audiosFile).map(([audioKey, _]) => (
+          <MenuItem key ={audioKey} value={audioKey}>{audioKey}</MenuItem>
+        ))}
+
+        </Select>
+
+        <InputLabel id="id_time">Tempo:</InputLabel>
+        <Select
+          labelId="time"
+          id="time"
+          value={time}
+          label="time"
+          onChange={handleChangeTIme}
+        >
+          <MenuItem value={20}>20 Minutos</MenuItem>
+          <MenuItem value={30}>30 Minutos</MenuItem>
+          <MenuItem value={40}>40 Minutos</MenuItem>
+          <MenuItem value={60}>1 Hora</MenuItem>
+        </Select>
+      {/* </FormControl> */}
+      </Stack>
 
         <List>
           {playlists.map(({ id, name, uri }, index) => (

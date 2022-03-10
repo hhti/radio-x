@@ -25,7 +25,6 @@ import React, { useRef, useState } from 'react';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 
-
 const Input = styled('input')({
   display: 'none',
 });
@@ -205,10 +204,8 @@ return (
       </Button>
     </label>
 
-    
     <audio ref={audioPlayer} src={'http://localhost:3005/audio/'+fileName} controls autoPlay/>
-    
-  
+      
   </Stack>
 
   {Object.entries(audiosFile).map(([audiosName, _]) => (
@@ -257,8 +254,6 @@ return (
     ))}
     
 </MainCard>
-
-
 
 );
 };
