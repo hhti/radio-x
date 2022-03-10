@@ -3,7 +3,7 @@ import {
   IconBrandChrome,
   IconCertificate,
   IconHelp,
-  IconLayoutCards,
+  IconLayoutCards
 } from '@tabler/icons';
 
 // constant
@@ -17,7 +17,7 @@ const outros = {
   children: [
     {
       id: 'sobre',
-      title: 'Sobre a Radio X',
+      title: 'Sobre a Radio Eleva',
       type: 'item',
       url: '/sobre',
       icon: icons.IconHelp,

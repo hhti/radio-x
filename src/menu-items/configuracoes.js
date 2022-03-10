@@ -1,31 +1,31 @@
 // assets
 import {
-  IconFileCode,
-  IconFilePlus,
-  IconListCheck,
-  IconTrash,
+  IconFileCode, IconHeadphones,
+  IconListCheck, IconMusic, IconPlayerPlay, IconSettings
 } from '@tabler/icons';
 
 // constant
 const icons = {
   IconFileCode,
-  IconFilePlus,
-  IconTrash,
+  IconHeadphones,
   IconListCheck,
+  IconMusic,
+  IconPlayerPlay,
+  IconSettings
 };
 
 // ==============================|| PLANEJAMENTO ||============================== //
 
 const configuracoes = {
   id: 'geral',
-  title: 'Gearl',
+  title: ' ',
   type: 'group',
   children: [
     {
       id: 'audio',
-      title: 'Audio',
+      title: 'Áudio',
       type: 'collapse',
-      icon: icons.IconFileCode,
+      icon: icons.IconHeadphones,
 
       children: [
         {
@@ -33,25 +33,17 @@ const configuracoes = {
           title: 'Tocar',
           type: 'item',
           url: '/testeRadio',
-          icon: icons.IconFilePlus,
+          icon: icons.IconPlayerPlay,
           breadcrumbs: false,
         },
         {
-          id: 'upload',
-          title: 'Uploads',
+          id: 'gestao',
+          title: 'Gestão de áudio',
           type: 'item',
           url: '/uploads',
           breadcrumbs: false,
-          icon: icons.IconTrash,
-        },
-        {
-          id: 'listar_Audios',
-          title: 'Listar Audios',
-          type: 'item',
-          url: '/listarAudios',
-          breadcrumbs: false,
-          icon: icons.IconListCheck,
-        },
+          icon: icons.IconSettings,
+        }
       ],
     },
   ],

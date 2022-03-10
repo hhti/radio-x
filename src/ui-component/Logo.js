@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
  * import logo from 'assets/images/logo.svg';
  *
  */
-import logo from 'assets/images/academia.png';
+import logo from 'assets/images/eleva.png';
 
 // ==============================|| LOGO SVG ||============================== //
 
@@ -21,7 +21,9 @@ const Logo = () => {
      * <img src={logo} alt="Berry" width="100" />
      *
      */
-    <img src={logo} alt="academia" width="80" />
+
+    
+    <img src={logo} alt="academia" width="160" />
 
     // <svg width="92" height="32" viewBox="0 0 92 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     //     <path

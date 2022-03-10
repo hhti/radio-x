@@ -9,19 +9,20 @@ import {
   Paper,
   Popper,
   Stack,
-  Typography,
+  Typography
 } from '@mui/material';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 // assets
 import { IconMoonStars, IconSun } from '@tabler/icons';
-import logo from 'assets/images/academia.png';
+import logo from 'assets/images/eleva.png';
 import { useEffect, useRef, useState } from 'react';
 // third-party
 import PerfectScrollbar from 'react-perfect-scrollbar';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
+
 
 const ProfileSection = () => {
   const theme = useTheme();
@@ -179,7 +180,7 @@ const ProfileSection = () => {
                           variant="h4"
                           sx={{ fontWeight: 400 }}
                         >
-                          academia x
+                          academia Eleva
                         </Typography>
                       </Stack>
                     </Stack>

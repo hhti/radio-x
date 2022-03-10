@@ -3,8 +3,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import PauseIcon from '@mui/icons-material/Pause';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import SendIcon from '@mui/icons-material/Send';
+import StopIcon from '@mui/icons-material/Stop';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -19,7 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 
@@ -43,6 +45,7 @@ const Uploads = () => {
 
   const urlServer = 'http://localhost:3005'
 
+  const audioPlayer = useRef();
   const [file, setFile] = useState();
   const [fileName, setFileName] = useState("");
   const [audiosFile, setAudiosFile] = useState([]);
@@ -50,7 +53,6 @@ const Uploads = () => {
   const [alertName, setAlertName] = React.useState('');
   const [alertType, setAlertType] = React.useState('warning');
   const [refresh, setRefresh] = React.useState(false);
-  const [playAudio, setPlayAudio] = React.useState();
   const [audioTitle, setAudioTitle] = useState("Gestão de áudio");
 
   const closeMessage =()=>{
@@ -98,38 +100,26 @@ const Uploads = () => {
     }
   };
 
-  const handleClickPlayAudio = async (audioName) => {
+   const pause = async () => {
+    await audioPlayer.current.pause();
+  };
 
-    console.log(audioName);
-    setFileName(audioName)
-    setAudioTitle('')
-    setAudioTitle('Gestão de áudio, você está ouvindo agora:  '+audioName)
+  const stop = async () => {
+    audioPlayer.current.pause();
+    audioPlayer.current.currentTime = 0;
+  };
+
+  React.useEffect(() => { 
+  }, [fileName]); 
+
+  const handleClickPlayAudio = (audioName) => {
+
+    setFileName(audioName);
     
+    setAudioTitle('Gestão de áudio, você está ouvindo agora:  '+audioName)
+    audioPlayer.current.play();
 
-    // return (
-    //   <IFrameWrapper id = {'id_'+audioName} width="100%" src={'http://localhost:3005/audio/'+audioName} />
-    // )
-    // const paramsApi = {
-    //   fileName: audioName
-    // };
-    // console.log(paramsApi);
-
-    // try {
-    //   const response = await axios.get('http://localhost:3005/audio', { fileName:audioName, });
-    //   console.log(response)
-    //   setPlayAudio(response.headers) 
-
-    //   return response.headers;
-
-    // }
-    // catch (error) {
-    //   console.log(error)
-    //   setAlertType("error");
-    //   setAlertName('Erro interno, contacte o Administrador');
-    //   setOpen(true);
-    // }
   }
-
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -140,10 +130,6 @@ const Uploads = () => {
     
     try {
       const response = await axios.delete(urlServer+'/delete', { data: paramsApi });
-      console.log("ENTROU")
-
-      console.log(response);
-
       setRefresh(!refresh);
       setAlertType("success");
       setAlertName(response.data);
@@ -160,7 +146,6 @@ const Uploads = () => {
     }
 
   }
-
 
   React.useEffect(() => {
     const getAudios = async () => {
@@ -219,9 +204,13 @@ return (
         Enviar
       </Button>
     </label>
-    {!fileName ? '':<IFrameWrapper width="100%" src={'http://localhost:3005/audio/'+fileName} />}
-  </Stack>
+
+    
+    <audio ref={audioPlayer} src={'http://localhost:3005/audio/'+fileName} controls autoPlay/>
+    
   
+  </Stack>
+
   {Object.entries(audiosFile).map(([audiosName, _]) => (
 
     <FormControl key={audiosName} onSubmit={handleSubmit}  sx={{ minWidth: 40 }}>
@@ -242,25 +231,29 @@ return (
           secondaryAction={
             <IconButton type="submit" edge="end" aria-label="delete" name={audiosName}  onClick={() => handleSubmit} >
               <DeleteIcon />
-              
             </IconButton>
           }
         >
           <IconButton  name={audiosName} value ={audiosName} onClick={() => handleClickPlayAudio(audiosName)} >
             <PlayCircleFilledWhiteIcon  /> 
           </IconButton>
+         
+          <IconButton  name={audiosName} value ={audiosName} onClick={() => pause()} >
+            <PauseIcon  /> 
+          </IconButton>
 
+          <IconButton  name={audiosName} value ={audiosName} onClick={() => stop()} >
+            <StopIcon  /> 
+          </IconButton>
+            
           <ListItemAvatar > <LibraryMusicIcon /></ListItemAvatar>
           
           <ListItemText primary={audiosName} />
         </ListItem>
-      </List>
-      {/* <span>{playAudio}</span> */}
+      </List>  
     </Box>
 
     </FormControl>
-
-
     ))}
     
 </MainCard>
