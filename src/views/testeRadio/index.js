@@ -17,12 +17,14 @@ import { Buffer } from 'buffer/';
 import React, { useRef, useState } from 'react';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
+
 import mp3_file_1 from '../../audiosRadio/Anomalous Hedges - The Mini Vandals.mp3';
 import { apiSpotify } from '../../services';
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;
+
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'code';
 
@@ -312,7 +314,8 @@ export default function TesteRadio() {
       )}
 
       <Card sx={{ overflow: 'hidden' }}>
-        <audio src={mp3_file_1} ref={audioPlayer} onTimeUpdate={onPlaying}>
+        {/* <audio src={mp3_file_1} ref={audioPlayer} onTimeUpdate={onPlaying}> */}
+        <audio src='' ref={audioPlayer} onTimeUpdate={onPlaying}>
           Your browser does not support the
           <code>audio</code> element.
         </audio>
