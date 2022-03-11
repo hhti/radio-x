@@ -5,4 +5,8 @@ const apiSpotify = axios.create({
   baseURL: config.apiSpotify,
 });
 
-export { apiSpotify };
+const api = axios.create({
+  baseURL: config.api,
+});
+
+export { apiSpotify, api };

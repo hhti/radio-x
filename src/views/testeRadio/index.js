@@ -12,7 +12,7 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -22,11 +22,11 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import axios from 'axios';
 import { Buffer } from 'buffer/';
+import config from 'config';
 import React, { useRef, useState } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
-import { apiSpotify } from '../../services';
+import { api, apiSpotify } from '../../services';
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
@@ -84,8 +84,6 @@ apiSpotify.interceptors.response.use(null, async (error) => {
 let currentInterval = 0;
 
 export default function TesteRadio() {
-  const urlServer = 'http://localhost:3005';
-
   const audioPlayer = useRef();
   const [currentTime, setCurrentTime] = useState(0);
   const [seekValue, setSeekValue] = useState(0);
@@ -213,7 +211,7 @@ export default function TesteRadio() {
       try {
         const {
           data: { audios },
-        } = await axios.get(urlServer + '/getAudios');
+        } = await api.get('/getAudios');
         setAudios(audios);
       } catch (ex) {
         setAlertType('error');
@@ -373,7 +371,7 @@ export default function TesteRadio() {
             {audios.length && (
               <audio
                 ref={audioPlayer}
-                src={`${urlServer}/audio/${audios[currentAudioPlaying]}`}
+                src={`${config.api}/audio/${audios[currentAudioPlaying]}`}
                 onTimeUpdate={onPlaying}
                 onEnded={handleOnEnded}
               />

@@ -20,10 +20,10 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import React, { useRef, useState } from 'react';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
+import { api } from '../../services';
 
 const Input = styled('input')({
   display: 'none',
@@ -41,8 +41,6 @@ const IFrameWrapper = styled('iframe')(({ theme }) => ({
 // ==============================|| UPLOADS ||============================== //
 
 const Uploads = () => {
-  const urlServer = 'http://localhost:3005';
-
   const audioPlayer = useRef();
   const [file, setFile] = useState();
   const [fileName, setFileName] = useState('');
@@ -77,7 +75,7 @@ const Uploads = () => {
     formData.append('fileName', fileName);
 
     try {
-      const res = await axios.post(urlServer + '/upload', formData);
+      const res = await api.post('/upload', formData);
       console.log(res);
       setAlertType('success');
       setAlertName('Upload feito com sucesso !!!');
@@ -119,7 +117,7 @@ const Uploads = () => {
     };
 
     try {
-      const response = await axios.delete(urlServer + '/delete', {
+      const response = await api.delete('/delete', {
         data: paramsApi,
       });
       setRefresh(!refresh);
@@ -141,7 +139,7 @@ const Uploads = () => {
       try {
         const {
           data: { audios },
-        } = await axios.get(urlServer + '/getAudios');
+        } = await api.get('/getAudios');
         setAudiosFile(audios);
       } catch (ex) {
         setAlertType('error');
