@@ -12,9 +12,10 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
+  ListItemText
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
@@ -80,6 +81,8 @@ apiSpotify.interceptors.response.use(null, async (error) => {
   return Promise.reject(error);
 });
 
+let currentInterval = 0;
+
 export default function TesteRadio() {
   const urlServer = 'http://localhost:3005';
 
@@ -96,19 +99,10 @@ export default function TesteRadio() {
   const [time, setTime] = React.useState(30);
   const [currentAudioPlaying, setCurrentAudioPlaying] = React.useState(0);
   const [audios, setAudios] = useState([]);
-  const [currentInterval, setCurrentInterval] = React.useState(0);
 
-  const closeMessage = () => {
-    let count = 0;
-
-    const interval = setInterval(() => {
-      count++;
-
-      if (count === 2) {
-        clearInterval(interval);
-        setOpen(false);
-      }
-    }, 2000);
+  const openMessageFor = (seconds) => {
+    setOpen(true);
+    setTimeout(() => setOpen(false), seconds * 1000);
   };
 
   const handleChange = (event) => {
@@ -154,19 +148,7 @@ export default function TesteRadio() {
     if (valueVolume >= '0.99') {
       setAlertType('success');
       setAlertName('Volume máximo');
-      setOpen(true);
-
-      let count = 0;
-
-      const interval = setInterval(() => {
-        count++;
-
-        if (count === 2) {
-          clearInterval(interval);
-          setOpen(false);
-        }
-      }, 1000);
-
+      openMessageFor(4);
       return;
     } else {
       setVolume(valueVolume + volume);
@@ -178,21 +160,9 @@ export default function TesteRadio() {
     if (valueVolume <= '0.1') {
       setAlertType('success');
       setAlertName('Volume mínimo');
-      setOpen(true);
-
+      openMessageFor(4);
       setVolume(0.0);
       audioPlayer.current.volume = valueVolume;
-
-      let count = 0;
-
-      const interval = setInterval(() => {
-        count++;
-
-        if (count === 2) {
-          clearInterval(interval);
-          setOpen(false);
-        }
-      }, 1000);
       return;
     } else {
       setVolume(valueVolume - volume);
@@ -239,14 +209,21 @@ export default function TesteRadio() {
   };
 
   React.useEffect(() => {
-    setCurrentInterval((currentInterval) => {
-      clearInterval(currentInterval);
-      const timeInMilliseconds = time * 60 * 1000;
-      return setInterval(() => {
-        play();
-      }, timeInMilliseconds);
-    });
-  }, [time, play]);
+    const getAudios = async () => {
+      try {
+        const {
+          data: { audios },
+        } = await axios.get(urlServer + '/getAudios');
+        setAudios(audios);
+      } catch (ex) {
+        setAlertType('error');
+        setAlertName('Contacte o Administrador !!!');
+        openMessageFor(4);
+      }
+    };
+
+    getAudios();
+  }, []);
 
   React.useEffect(() => {
     const search = window.location.search;
@@ -336,47 +313,17 @@ export default function TesteRadio() {
   }, [isLogged]);
 
   React.useEffect(() => {
-    const getAudios = async () => {
-      try {
-        const {
-          data: { audios },
-        } = await axios.get(urlServer + '/getAudios');
-        setAudios(audios);
-      } catch (ex) {
-        setAlertType('error');
-        setAlertName('Contacte o Administrador !!!');
-        setOpen(true);
-        closeMessage();
-      }
-    };
-
-    getAudios();
-  }, []);
+    if (isLogged) {
+      clearInterval(currentInterval);
+      const timeInMilliseconds = time * 60 * 1000;
+      currentInterval = setInterval(() => {
+        play();
+      }, timeInMilliseconds);
+    }
+  }, [isLogged, time, play]);
 
   return (
-    <MainCard
-      title="Radio Eleva"
-      secondary={
-        !isLogged ? (
-          <IconButton
-            color="primary"
-            aria-label="Loggin Spotify"
-            href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state`}
-          >
-            <SettingsPowerIcon />
-          </IconButton>
-        ) : (
-          <IconButton
-            color="primary"
-            onClick={logout}
-            title="Logout Spotify"
-            aria-label="Logout Spotify"
-          >
-            <LogoutIcon />
-          </IconButton>
-        )
-      }
-    >
+    <MainCard title="Radio Eleva">
       <Collapse in={open}>
         <Alert
           variant="filled"
@@ -399,119 +346,144 @@ export default function TesteRadio() {
         </Alert>
       </Collapse>
 
-      <Card sx={{ overflow: 'hidden' }}>
-        {audios.length && (
-          <audio
-            ref={audioPlayer}
-            src={`${urlServer}/audio/${audios[currentAudioPlaying]}`}
-            onTimeUpdate={onPlaying}
-            onEnded={handleOnEnded}
-          />
-        )}
+      {!isLogged ? (
+        <IconButton
+          color="primary"
+          aria-label="Loggin Spotify"
+          href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state`}
+        >
+          <SettingsPowerIcon />
+        </IconButton>
+      ) : (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box />
 
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          value={seekValue}
-          onChange={(e) => {
-            const seekto =
-              audioPlayer.current.duration * (+e.target.value / 100);
-            audioPlayer.current.currentTime = seekto;
-            setSeekValue(e.target.value);
-          }}
-        />
-
-        <Stack spacing={1} direction="row">
-          <IconButton
-            aria-label="less"
-            title="Abaixar volume"
-            onClick={() => setVolumeLess(0.1)}
-          >
-            <VolumeDownIcon />
-          </IconButton>
-
-          <IconButton aria-label="play" title="play" onClick={play}>
-            <PlayCircleFilledWhiteIcon />
-          </IconButton>
-
-          <IconButton aria-label="pause" title="pause" onClick={pause}>
-            <PauseCircleIcon />
-          </IconButton>
-
-          <IconButton aria-label="stop" title="stop" onClick={stop}>
-            <StopIcon />
-          </IconButton>
-
-          <IconButton
-            aria-label="plus"
-            title="Aumentar volume"
-            onClick={() => setVolumePlus(0.1)}
-          >
-            <VolumeUpIcon />
-          </IconButton>
-        </Stack>
-
-        <Stack spacing={2} direction="row" sx={{ m: 1, minWidth: 180 }}>
-          {/* <FormControl onSubmit={handleSubmit} sx={{ m: 1, minWidth: 180 }}> */}
-          <InputLabel
-            id="demo-simple-select-label"
-            sx={{
-              '& .MuiTextField-root': { m: 1, width: '25ch' },
-              '& .MuiButton-root': { m: 1, width: '20ch' },
-              '& .MuiInputLabel-root': { m: 1, width: '60ch' },
-            }}
-          >
-            Áudios:
-          </InputLabel>
-
-          <Select
-            labelId="audio"
-            id="id_audio"
-            value={audios[currentAudioPlaying] || ''}
-            label="Audio"
-            onChange={handleChange}
-          >
-            {audios.map((audio, index) => (
-              <MenuItem key={index} value={audio}>
-                {audio}
-              </MenuItem>
-            ))}
-          </Select>
-
-          <InputLabel id="id_time">Tempo:</InputLabel>
-          <Select
-            labelId="time"
-            id="time"
-            value={time}
-            label="time"
-            onChange={handleChangeTIme}
-          >
-            <MenuItem value={20}>20 Minutos</MenuItem>
-            <MenuItem value={30}>30 Minutos</MenuItem>
-            <MenuItem value={40}>40 Minutos</MenuItem>
-            <MenuItem value={60}>1 Hora</MenuItem>
-          </Select>
-          {/* </FormControl> */}
-        </Stack>
-
-        <List>
-          {playlists.map(({ id, name, uri }, index) => (
-            <ListItemButton
-              key={id}
-              selected={selectedPlaylistIndex === index}
-              onClick={handleClickPlayList(index, uri)}
+            <IconButton
+              color="primary"
+              onClick={logout}
+              title="Logout Spotify"
+              aria-label="Logout Spotify"
             >
-              <ListItemIcon>
-                <PlaylistPlay />
-              </ListItemIcon>
+              <LogoutIcon />
+            </IconButton>
+          </Box>
 
-              <ListItemText primary={name} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Card>
+          <Card sx={{ overflow: 'hidden' }}>
+            {audios.length && (
+              <audio
+                ref={audioPlayer}
+                src={`${urlServer}/audio/${audios[currentAudioPlaying]}`}
+                onTimeUpdate={onPlaying}
+                onEnded={handleOnEnded}
+              />
+            )}
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={seekValue}
+              onChange={(e) => {
+                const seekto =
+                  audioPlayer.current.duration * (+e.target.value / 100);
+                audioPlayer.current.currentTime = seekto;
+                setSeekValue(e.target.value);
+              }}
+            />
+
+            <Stack spacing={1} direction="row">
+              <IconButton
+                aria-label="less"
+                title="Abaixar volume"
+                onClick={() => setVolumeLess(0.1)}
+              >
+                <VolumeDownIcon />
+              </IconButton>
+
+              <IconButton aria-label="play" title="play" onClick={play}>
+                <PlayCircleFilledWhiteIcon />
+              </IconButton>
+
+              <IconButton aria-label="pause" title="pause" onClick={pause}>
+                <PauseCircleIcon />
+              </IconButton>
+
+              <IconButton aria-label="stop" title="stop" onClick={stop}>
+                <StopIcon />
+              </IconButton>
+
+              <IconButton
+                aria-label="plus"
+                title="Aumentar volume"
+                onClick={() => setVolumePlus(0.1)}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Stack>
+
+            <Stack spacing={2} direction="row" sx={{ m: 1, minWidth: 180 }}>
+              {/* <FormControl onSubmit={handleSubmit} sx={{ m: 1, minWidth: 180 }}> */}
+              <InputLabel
+                id="demo-simple-select-label"
+                sx={{
+                  '& .MuiTextField-root': { m: 1, width: '25ch' },
+                  '& .MuiButton-root': { m: 1, width: '20ch' },
+                  '& .MuiInputLabel-root': { m: 1, width: '60ch' },
+                }}
+              >
+                Áudios:
+              </InputLabel>
+
+              <Select
+                labelId="audio"
+                id="id_audio"
+                value={audios[currentAudioPlaying] || ''}
+                label="Audio"
+                onChange={handleChange}
+              >
+                {audios.map((audio, index) => (
+                  <MenuItem key={index} value={audio}>
+                    {audio}
+                  </MenuItem>
+                ))}
+              </Select>
+
+              <InputLabel id="id_time">Tempo:</InputLabel>
+              <Select
+                labelId="time"
+                id="time"
+                value={time}
+                label="time"
+                onChange={handleChangeTIme}
+              >
+                <MenuItem value={20}>20 Minutos</MenuItem>
+                <MenuItem value={30}>30 Minutos</MenuItem>
+                <MenuItem value={40}>40 Minutos</MenuItem>
+                <MenuItem value={60}>1 Hora</MenuItem>
+              </Select>
+              {/* </FormControl> */}
+            </Stack>
+
+            <List>
+              {playlists.map(({ id, name, uri }, index) => (
+                <ListItemButton
+                  key={id}
+                  selected={selectedPlaylistIndex === index}
+                  onClick={handleClickPlayList(index, uri)}
+                >
+                  <ListItemIcon>
+                    <PlaylistPlay />
+                  </ListItemIcon>
+
+                  <ListItemText primary={name} />
+                </ListItemButton>
+              ))}
+            </List>
+          </Card>
+        </>
+      )}
     </MainCard>
   );
 }
