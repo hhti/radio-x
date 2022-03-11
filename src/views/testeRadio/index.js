@@ -12,7 +12,7 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Collapse from '@mui/material/Collapse';
@@ -35,7 +35,7 @@ const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'code';
 
 const refreshToken = async () => {
-  const { refresh_token } = JSON.parse(window.localStorage.getItem('token'));
+  const { refresh_token } = JSON.parse(localStorage.getItem('token'));
 
   const params = new URLSearchParams({
     grant_type: 'refresh_token',
@@ -58,7 +58,10 @@ const refreshToken = async () => {
 
   window.localStorage.setItem(
     'token',
-    JSON.stringify({ access_token, refresh_token: new_refresh_token })
+    JSON.stringify({
+      access_token,
+      refresh_token: new_refresh_token || refresh_token,
+    })
   );
 
   apiSpotify.defaults.headers['Authorization'] = `Bearer ${access_token}`;
@@ -78,7 +81,7 @@ apiSpotify.interceptors.response.use(null, async (error) => {
 });
 
 export default function TesteRadio() {
-  const urlServer = 'http://localhost:3005'
+  const urlServer = 'http://localhost:3005';
 
   const audioPlayer = useRef();
   const [currentTime, setCurrentTime] = useState(0);
@@ -90,11 +93,12 @@ export default function TesteRadio() {
   const [isLogged, setIsLogged] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylistIndex, setSelectedPlayListIndex] = useState(-1);
-  const [audio, setAudio] = React.useState("");
   const [time, setTime] = React.useState(30);
-  const [audiosFile, setAudiosFile] = useState({});
+  const [currentAudioPlaying, setCurrentAudioPlaying] = React.useState(0);
+  const [audios, setAudios] = useState([]);
+  const [currentInterval, setCurrentInterval] = React.useState(0);
 
-  const closeMessage =()=>{
+  const closeMessage = () => {
     let count = 0;
 
     const interval = setInterval(() => {
@@ -104,29 +108,28 @@ export default function TesteRadio() {
         clearInterval(interval);
         setOpen(false);
       }
-
     }, 2000);
-  }
+  };
 
-
-  const handleSwitchingSongs =()=>{
-    //selectedPlaylistIndex 
-  }
-  
   const handleChange = (event) => {
-    setAudio(event.target.value);
-    console.log(event.target.value)
+    const audioIndex = audios.findIndex(
+      (audio) => audio === event.target.value
+    );
+    setCurrentAudioPlaying(audioIndex);
   };
 
   const handleChangeTIme = (event) => {
     setTime(event.target.value);
-    console.log(event.target.value)
   };
 
+  const setSpotifyVolume = async (volume) => {
+    await apiSpotify.put(`me/player/volume?volume_percent=${volume}`);
+  };
 
-  const play = () => {
+  const play = React.useCallback(() => {
+    setSpotifyVolume(50);
     audioPlayer.current.play();
-  };
+  }, []);
 
   const pause = () => {
     audioPlayer.current.pause();
@@ -137,12 +140,17 @@ export default function TesteRadio() {
     audioPlayer.current.currentTime = 0;
   };
 
+  const next = () => {
+    const nextAudio =
+      currentAudioPlaying + 1 === audios.length ? 0 : currentAudioPlaying + 1;
+    setCurrentAudioPlaying(nextAudio);
+  };
+
   const setSpeed = (speed) => {
     audioPlayer.current.playbackRate = speed;
   };
 
   const setVolumePlus = (volume) => {
-    console.log(valueVolume);
     if (valueVolume >= '0.99') {
       setAlertType('success');
       setAlertName('Volume máximo');
@@ -165,7 +173,7 @@ export default function TesteRadio() {
       audioPlayer.current.volume = valueVolume;
     }
   };
-  
+
   const setVolumeLess = (volume) => {
     if (valueVolume <= '0.1') {
       setAlertType('success');
@@ -187,7 +195,6 @@ export default function TesteRadio() {
       }, 1000);
       return;
     } else {
-      console.log(valueVolume);
       setVolume(valueVolume - volume);
       audioPlayer.current.volume = valueVolume;
     }
@@ -195,9 +202,15 @@ export default function TesteRadio() {
 
   const onPlaying = () => {
     setCurrentTime(audioPlayer.current.currentTime);
-    setSeekValue(
-      (audioPlayer.current.currentTime / audioPlayer.current.duration) * 100
-    );
+    const seekValue =
+      (audioPlayer.current.currentTime / audioPlayer.current.duration || 0) *
+      100;
+    setSeekValue(seekValue);
+  };
+
+  const handleOnEnded = () => {
+    setSpotifyVolume(100);
+    next();
   };
 
   const logout = () => {
@@ -224,6 +237,16 @@ export default function TesteRadio() {
       context_uri: uri,
     });
   };
+
+  React.useEffect(() => {
+    setCurrentInterval((currentInterval) => {
+      clearInterval(currentInterval);
+      const timeInMilliseconds = time * 60 * 1000;
+      return setInterval(() => {
+        play();
+      }, timeInMilliseconds);
+    });
+  }, [time, play]);
 
   React.useEffect(() => {
     const search = window.location.search;
@@ -274,17 +297,8 @@ export default function TesteRadio() {
       };
 
       fetchToken();
-
     }
-
   }, []);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    console.log(event)
-
-  }  
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -323,48 +337,45 @@ export default function TesteRadio() {
 
   React.useEffect(() => {
     const getAudios = async () => {
-      
       try {
-        const res = await axios.get(urlServer+"/getAudios" );
-        setAudiosFile(res.data);
-        setAudio(Object.keys(res.data)[0]);
-        stop();
-  
+        const {
+          data: { audios },
+        } = await axios.get(urlServer + '/getAudios');
+        setAudios(audios);
       } catch (ex) {
         setAlertType('error');
         setAlertName('Contacte o Administrador !!!');
         setOpen(true);
         closeMessage();
-        console.log(ex);
       }
-    }
+    };
 
     getAudios();
-    
-    if (isLogged) {
-      getAudios();
-      return;
-    }
-    
-  },[]);
-
-  React.useEffect(() => { 
-  }, [audio]); 
+  }, []);
 
   return (
     <MainCard
       title="Radio Eleva"
-      secondary=
-        {!isLogged ?(
-
-        <IconButton color="primary" aria-label="Loggin Spotify"  href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state`}>
-          <SettingsPowerIcon />
-        </IconButton>
+      secondary={
+        !isLogged ? (
+          <IconButton
+            color="primary"
+            aria-label="Loggin Spotify"
+            href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state`}
+          >
+            <SettingsPowerIcon />
+          </IconButton>
         ) : (
-        <IconButton color="primary" onClick={logout} title= "Logout Spotify" aria-label="Logout Spotify">
-          <LogoutIcon />
-        </IconButton>
-        )}
+          <IconButton
+            color="primary"
+            onClick={logout}
+            title="Logout Spotify"
+            aria-label="Logout Spotify"
+          >
+            <LogoutIcon />
+          </IconButton>
+        )
+      }
     >
       <Collapse in={open}>
         <Alert
@@ -389,8 +400,14 @@ export default function TesteRadio() {
       </Collapse>
 
       <Card sx={{ overflow: 'hidden' }}>
-
-        <audio ref={audioPlayer} src={urlServer+'/audio/'+audio} autoPlay onTimeUpdate={onPlaying}/>
+        {audios.length && (
+          <audio
+            ref={audioPlayer}
+            src={`${urlServer}/audio/${audios[currentAudioPlaying]}`}
+            onTimeUpdate={onPlaying}
+            onEnded={handleOnEnded}
+          />
+        )}
 
         <input
           type="range"
@@ -407,67 +424,77 @@ export default function TesteRadio() {
         />
 
         <Stack spacing={1} direction="row">
-          <IconButton aria-label="less" title='Abaixar volume' onClick={() => setVolumeLess(0.1)}>
+          <IconButton
+            aria-label="less"
+            title="Abaixar volume"
+            onClick={() => setVolumeLess(0.1)}
+          >
             <VolumeDownIcon />
           </IconButton>
 
-          <IconButton aria-label="play" title='play' onClick={play}>
+          <IconButton aria-label="play" title="play" onClick={play}>
             <PlayCircleFilledWhiteIcon />
           </IconButton>
 
-          <IconButton aria-label="pause" title='pause' onClick={pause}>
+          <IconButton aria-label="pause" title="pause" onClick={pause}>
             <PauseCircleIcon />
           </IconButton>
 
-          <IconButton aria-label="stop" title='stop' onClick={stop}>
+          <IconButton aria-label="stop" title="stop" onClick={stop}>
             <StopIcon />
           </IconButton>
 
-          <IconButton aria-label="plus" title='Aumentar volume' onClick={() => setVolumePlus(0.1)}>
+          <IconButton
+            aria-label="plus"
+            title="Aumentar volume"
+            onClick={() => setVolumePlus(0.1)}
+          >
             <VolumeUpIcon />
           </IconButton>
         </Stack>
 
-
         <Stack spacing={2} direction="row" sx={{ m: 1, minWidth: 180 }}>
-      {/* <FormControl onSubmit={handleSubmit} sx={{ m: 1, minWidth: 180 }}> */}
-        <InputLabel id="demo-simple-select-label" 
-                 sx={{
-                  '& .MuiTextField-root': { m: 1, width: '25ch' },
-                  '& .MuiButton-root': { m: 1, width: '20ch' },
-                  '& .MuiInputLabel-root': { m: 1, width: '60ch' },
-                }}
-        
-        >Áudios:</InputLabel>
+          {/* <FormControl onSubmit={handleSubmit} sx={{ m: 1, minWidth: 180 }}> */}
+          <InputLabel
+            id="demo-simple-select-label"
+            sx={{
+              '& .MuiTextField-root': { m: 1, width: '25ch' },
+              '& .MuiButton-root': { m: 1, width: '20ch' },
+              '& .MuiInputLabel-root': { m: 1, width: '60ch' },
+            }}
+          >
+            Áudios:
+          </InputLabel>
 
-        <Select
-          labelId="audio"
-          id="id_audio"
-          value={audio}
-          label="Audio"
-          onChange={handleChange}
-        >
-        {Object.entries(audiosFile).map(([audioKey, _]) => (
-          <MenuItem key ={audioKey} value={audioKey}>{audioKey}</MenuItem>
-        ))}
+          <Select
+            labelId="audio"
+            id="id_audio"
+            value={audios[currentAudioPlaying] || ''}
+            label="Audio"
+            onChange={handleChange}
+          >
+            {audios.map((audio, index) => (
+              <MenuItem key={index} value={audio}>
+                {audio}
+              </MenuItem>
+            ))}
+          </Select>
 
-        </Select>
-
-        <InputLabel id="id_time">Tempo:</InputLabel>
-        <Select
-          labelId="time"
-          id="time"
-          value={time}
-          label="time"
-          onChange={handleChangeTIme}
-        >
-          <MenuItem value={20}>20 Minutos</MenuItem>
-          <MenuItem value={30}>30 Minutos</MenuItem>
-          <MenuItem value={40}>40 Minutos</MenuItem>
-          <MenuItem value={60}>1 Hora</MenuItem>
-        </Select>
-      {/* </FormControl> */}
-      </Stack>
+          <InputLabel id="id_time">Tempo:</InputLabel>
+          <Select
+            labelId="time"
+            id="time"
+            value={time}
+            label="time"
+            onChange={handleChangeTIme}
+          >
+            <MenuItem value={20}>20 Minutos</MenuItem>
+            <MenuItem value={30}>30 Minutos</MenuItem>
+            <MenuItem value={40}>40 Minutos</MenuItem>
+            <MenuItem value={60}>1 Hora</MenuItem>
+          </Select>
+          {/* </FormControl> */}
+        </Stack>
 
         <List>
           {playlists.map(({ id, name, uri }, index) => (

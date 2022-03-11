@@ -9,7 +9,7 @@ import {
   Paper,
   Popper,
   Stack,
-  Typography
+  Typography,
 } from '@mui/material';
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -22,7 +22,6 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-
 
 const ProfileSection = () => {
   const theme = useTheme();

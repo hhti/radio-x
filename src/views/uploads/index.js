@@ -36,25 +36,24 @@ const Demo = styled('div')(({ theme }) => ({
 const IFrameWrapper = styled('iframe')(({ theme }) => ({
   height: 'calc(10vh - 10px)',
   border: '1px solid',
-  borderColor: theme.palette.primary.light
+  borderColor: theme.palette.primary.light,
 }));
 // ==============================|| UPLOADS ||============================== //
 
 const Uploads = () => {
-
-  const urlServer = 'http://localhost:3005'
+  const urlServer = 'http://localhost:3005';
 
   const audioPlayer = useRef();
   const [file, setFile] = useState();
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState('');
   const [audiosFile, setAudiosFile] = useState([]);
   const [open, setOpen] = useState(false);
   const [alertName, setAlertName] = React.useState('');
   const [alertType, setAlertType] = React.useState('warning');
   const [refresh, setRefresh] = React.useState(false);
-  const [audioTitle, setAudioTitle] = useState("Gestão de áudio");
+  const [audioTitle, setAudioTitle] = useState('Gestão de áudio');
 
-  const closeMessage =()=>{
+  const closeMessage = () => {
     let count = 0;
 
     const interval = setInterval(() => {
@@ -64,9 +63,8 @@ const Uploads = () => {
         clearInterval(interval);
         setOpen(false);
       }
-
     }, 2000);
-  }
+  };
 
   const saveFile = (e) => {
     setFile(e.target.files[0]);
@@ -75,21 +73,17 @@ const Uploads = () => {
 
   const uploadFile = async (e) => {
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("fileName", fileName);
+    formData.append('file', file);
+    formData.append('fileName', fileName);
 
     try {
-      const res = await axios.post(
-        urlServer+"/upload",
-        formData
-      );
+      const res = await axios.post(urlServer + '/upload', formData);
       console.log(res);
       setAlertType('success');
       setAlertName('Upload feito com sucesso !!!');
       setRefresh(!refresh);
       setOpen(true);
       closeMessage();
-
     } catch (ex) {
       setAlertType('error');
       setAlertName('Falha no Upload !!!');
@@ -99,7 +93,7 @@ const Uploads = () => {
     }
   };
 
-   const pause = async () => {
+  const pause = async () => {
     await audioPlayer.current.pause();
   };
 
@@ -108,51 +102,47 @@ const Uploads = () => {
     audioPlayer.current.currentTime = 0;
   };
 
-  React.useEffect(() => { 
-  }, [fileName]); 
+  React.useEffect(() => {}, [fileName]);
 
   const handleClickPlayAudio = (audioName) => {
-
     setFileName(audioName);
-    
-    setAudioTitle('Gestão de áudio, você está ouvindo agora:  '+audioName)
-    audioPlayer.current.play();
 
-  }
+    setAudioTitle('Gestão de áudio, você está ouvindo agora:  ' + audioName);
+    audioPlayer.current.play();
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const paramsApi = {
-      audioName: event.target[0].name
+      audioName: event.target[0].name,
     };
-    
+
     try {
-      const response = await axios.delete(urlServer+'/delete', { data: paramsApi });
+      const response = await axios.delete(urlServer + '/delete', {
+        data: paramsApi,
+      });
       setRefresh(!refresh);
-      setAlertType("success");
+      setAlertType('success');
       setAlertName(response.data);
       setOpen(true);
 
       closeMessage();
-
-    }
-    catch (error) {
-      console.log(error)
-      setAlertType("error");
+    } catch (error) {
+      console.log(error);
+      setAlertType('error');
       setAlertName('Erro interno, contacte o Administrador');
       setOpen(true);
     }
-
-  }
+  };
 
   React.useEffect(() => {
     const getAudios = async () => {
-
       try {
-        const res = await axios.get(urlServer+"/getAudios" );
-        setAudiosFile(res.data)
-  
+        const {
+          data: { audios },
+        } = await axios.get(urlServer + '/getAudios');
+        setAudiosFile(audios);
       } catch (ex) {
         setAlertType('error');
         setAlertName('Contacte o Administrador !!!');
@@ -160,102 +150,127 @@ const Uploads = () => {
         closeMessage();
         console.log(ex);
       }
-    }
+    };
 
-    getAudios()
-  },[refresh])
-  
-return (
+    getAudios();
+  }, [refresh]);
 
-  <MainCard title={audioTitle} >
-
-    <Collapse in={open}>
-            <Alert
-              variant="filled"
-              severity={alertType}
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setOpen(false);
-                  }}
-                >
-                  <CloseIcon fontSize="inherit" />
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
+  return (
+    <MainCard title={audioTitle}>
+      <Collapse in={open}>
+        <Alert
+          variant="filled"
+          severity={alertType}
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpen(false);
+              }}
             >
-              {alertName}
-            </Alert>
-    </Collapse>
-
-    <Stack direction="row" alignItems="center" spacing={2}>
-    <label htmlFor="contained-button-file">
-      <Input accept="audio/mp3" onChange={saveFile} id="contained-button-file" multiple type="file" />
-      <Button variant="contained" component="span" endIcon={<FileUploadIcon />}>
-        Upload
-      </Button>
-    </label>
-    <label htmlFor="icon-button-file">
-    <Button variant="contained" onClick={uploadFile}  endIcon={<SendIcon />}>
-        Enviar
-      </Button>
-    </label>
-
-    <audio ref={audioPlayer} src={'http://localhost:3005/audio/'+fileName} controls autoPlay/>
-      
-  </Stack>
-
-  {Object.entries(audiosFile).map(([audiosName, _]) => (
-
-    <FormControl key={audiosName} onSubmit={handleSubmit}  sx={{ minWidth: 40 }}>
-    <Box
-      component="form"
-      sx={{
-        '& .MuiTextField-root': { width: '25ch' },
-        '& .MuiButton-root': { width: '20ch' },
-        '& .MuiSelect-root': { width: '25ch' },
-        '& .MuiList-root': { width: '80ch' },
-      }}
-      noValidate
-      autoComplete="off"
-    >
-      <List dense sx={{ display: 'block' }}>
-        <Divider />
-        <ListItem
-          secondaryAction={
-            <IconButton type="submit" edge="end" aria-label="delete" name={audiosName}  onClick={() => handleSubmit} >
-              <DeleteIcon />
+              <CloseIcon fontSize="inherit" />
             </IconButton>
           }
+          sx={{ mb: 2 }}
         >
-          <IconButton  name={audiosName} value ={audiosName} onClick={() => handleClickPlayAudio(audiosName)} >
-            <PlayCircleFilledWhiteIcon  /> 
-          </IconButton>
-         
-          <IconButton  name={audiosName} value ={audiosName} onClick={() => pause()} >
-            <PauseIcon  /> 
-          </IconButton>
+          {alertName}
+        </Alert>
+      </Collapse>
 
-          <IconButton  name={audiosName} value ={audiosName} onClick={() => stop()} >
-            <StopIcon  /> 
-          </IconButton>
-            
-          <ListItemAvatar > <LibraryMusicIcon /></ListItemAvatar>
-          
-          <ListItemText primary={audiosName} />
-        </ListItem>
-      </List>  
-    </Box>
+      <Stack direction="row" alignItems="center" spacing={2}>
+        <label htmlFor="contained-button-file">
+          <Input
+            accept="audio/mp3"
+            onChange={saveFile}
+            id="contained-button-file"
+            multiple
+            type="file"
+          />
+          <Button
+            variant="contained"
+            component="span"
+            endIcon={<FileUploadIcon />}
+          >
+            Upload
+          </Button>
+        </label>
+        <label htmlFor="icon-button-file">
+          <Button
+            variant="contained"
+            onClick={uploadFile}
+            endIcon={<SendIcon />}
+          >
+            Enviar
+          </Button>
+        </label>
 
-    </FormControl>
-    ))}
-    
-</MainCard>
+        <audio
+          ref={audioPlayer}
+          src={'http://localhost:3005/audio/' + fileName}
+          controls
+          autoPlay
+        />
+      </Stack>
 
-);
+      {audiosFile.map((audio) => (
+        <FormControl key={audio} onSubmit={handleSubmit} sx={{ minWidth: 40 }}>
+          <Box
+            component="form"
+            sx={{
+              '& .MuiTextField-root': { width: '25ch' },
+              '& .MuiButton-root': { width: '20ch' },
+              '& .MuiSelect-root': { width: '25ch' },
+              '& .MuiList-root': { width: '80ch' },
+            }}
+            noValidate
+            autoComplete="off"
+          >
+            <List dense sx={{ display: 'block' }}>
+              <Divider />
+              <ListItem
+                secondaryAction={
+                  <IconButton
+                    type="submit"
+                    edge="end"
+                    aria-label="delete"
+                    name={audio}
+                    onClick={() => handleSubmit}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                }
+              >
+                <IconButton
+                  name={audio}
+                  value={audio}
+                  onClick={() => handleClickPlayAudio(audio)}
+                >
+                  <PlayCircleFilledWhiteIcon />
+                </IconButton>
+
+                <IconButton name={audio} value={audio} onClick={() => pause()}>
+                  <PauseIcon />
+                </IconButton>
+
+                <IconButton name={audio} value={audio} onClick={() => stop()}>
+                  <StopIcon />
+                </IconButton>
+
+                <ListItemAvatar>
+                  {' '}
+                  <LibraryMusicIcon />
+                </ListItemAvatar>
+
+                <ListItemText primary={audio} />
+              </ListItem>
+            </List>
+          </Box>
+        </FormControl>
+      ))}
+    </MainCard>
+  );
 };
 
 export default Uploads;

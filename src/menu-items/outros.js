@@ -3,7 +3,7 @@ import {
   IconBrandChrome,
   IconCertificate,
   IconHelp,
-  IconLayoutCards
+  IconLayoutCards,
 } from '@tabler/icons';
 
 // constant

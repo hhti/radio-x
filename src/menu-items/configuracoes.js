@@ -1,7 +1,11 @@
 // assets
 import {
-  IconFileCode, IconHeadphones,
-  IconListCheck, IconMusic, IconPlayerPlay, IconSettings
+  IconFileCode,
+  IconHeadphones,
+  IconListCheck,
+  IconMusic,
+  IconPlayerPlay,
+  IconSettings,
 } from '@tabler/icons';
 
 // constant
@@ -11,7 +15,7 @@ const icons = {
   IconListCheck,
   IconMusic,
   IconPlayerPlay,
-  IconSettings
+  IconSettings,
 };
 
 // ==============================|| PLANEJAMENTO ||============================== //
@@ -43,7 +47,7 @@ const configuracoes = {
           url: '/uploads',
           breadcrumbs: false,
           icon: icons.IconSettings,
-        }
+        },
       ],
     },
   ],

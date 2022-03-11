@@ -3,12 +3,10 @@ import MainLayout from 'layout/MainLayout';
 import { lazy } from 'react';
 import Loadable from 'ui-component/Loadable';
 
-
 const Sobre = Loadable(lazy(() => import('views/sobre')));
 const TesteRadio = Loadable(lazy(() => import('views/testeRadio')));
 const MainPageRadio = Loadable(lazy(() => import('views/mainPageRadio')));
 const Uploads = Loadable(lazy(() => import('views/uploads')));
-
 
 // ==============================|| PRINCIPAIS ROTAS ||============================== //
 
@@ -39,7 +37,7 @@ const MainRoutes = {
     {
       path: '/uploads',
       element: <Uploads />,
-    }
+    },
   ],
 };
 

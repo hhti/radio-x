@@ -22,27 +22,29 @@ const Sobre = () => (
         width="150"
         height="150"
       />
-
     </Grid>
 
-
     <Grid container justifyContent="center">
-    <Typography variant="body2" >
-          Feito com <FavoriteIcon aria-label="add to shopping cart" fontSize="small" />, dúvidas ou problemas, nos contacte: {' '}
-          <SecondaryAction
-            title="WhatsApp Tiago"
-            icon={<WhatsAppIcon aria-label="add to shopping cart" fontSize="small" />}
-            link={`https://api.whatsapp.com/send?phone=5561995050113&text=Ol%C3%A1%2C%20prezado%2C%20espero%20que%20esteja%20bem%2C%20em%20que%20podemos%20ajudar%3F`}
-          />{' '}
-          ou
-          {' '}
-          <SecondaryAction
-            title="WhatsApp Walber"
-            icon={<WhatsAppIcon aria-label="add to shopping cart" fontSize="small" />}
-            link={`https://api.whatsapp.com/send?phone=5561996060684&text=Ol%C3%A1%2C%20prezado%2C%20espero%20que%20esteja%20bem%2C%20em%20que%20podemos%20ajudar%3F`}
-          />
-    
-    </Typography>
+      <Typography variant="body2">
+        Feito com{' '}
+        <FavoriteIcon aria-label="add to shopping cart" fontSize="small" />,
+        dúvidas ou problemas, nos contacte:{' '}
+        <SecondaryAction
+          title="WhatsApp Tiago"
+          icon={
+            <WhatsAppIcon aria-label="add to shopping cart" fontSize="small" />
+          }
+          link={`https://api.whatsapp.com/send?phone=5561995050113&text=Ol%C3%A1%2C%20prezado%2C%20espero%20que%20esteja%20bem%2C%20em%20que%20podemos%20ajudar%3F`}
+        />{' '}
+        ou{' '}
+        <SecondaryAction
+          title="WhatsApp Walber"
+          icon={
+            <WhatsAppIcon aria-label="add to shopping cart" fontSize="small" />
+          }
+          link={`https://api.whatsapp.com/send?phone=5561996060684&text=Ol%C3%A1%2C%20prezado%2C%20espero%20que%20esteja%20bem%2C%20em%20que%20podemos%20ajudar%3F`}
+        />
+      </Typography>
     </Grid>
   </MainCard>
 );
