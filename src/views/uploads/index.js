@@ -20,7 +20,8 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
-import React, { useRef, useState } from 'react';
+import config from 'config';
+import { useEffect, useRef, useState } from 'react';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import { api } from '../../services';
@@ -29,26 +30,16 @@ const Input = styled('input')({
   display: 'none',
 });
 
-const Demo = styled('div')(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-}));
-
-const IFrameWrapper = styled('iframe')(({ theme }) => ({
-  height: 'calc(10vh - 10px)',
-  border: '1px solid',
-  borderColor: theme.palette.primary.light,
-}));
-// ==============================|| UPLOADS ||============================== //
-
 const Uploads = () => {
   const audioPlayer = useRef();
   const [file, setFile] = useState();
   const [fileName, setFileName] = useState('');
   const [audiosFile, setAudiosFile] = useState([]);
+  const [currentAudioPlaying, setCurrentAudioPlaying] = useState(0);
   const [open, setOpen] = useState(false);
-  const [alertName, setAlertName] = React.useState('');
-  const [alertType, setAlertType] = React.useState('warning');
-  const [refresh, setRefresh] = React.useState(false);
+  const [alertName, setAlertName] = useState('');
+  const [alertType, setAlertType] = useState('warning');
+  const [refresh, setRefresh] = useState(false);
   const [audioTitle, setAudioTitle] = useState('Gestão de áudio');
 
   const closeMessage = () => {
@@ -100,10 +91,9 @@ const Uploads = () => {
     audioPlayer.current.currentTime = 0;
   };
 
-  React.useEffect(() => {}, [fileName]);
-
   const handleClickPlayAudio = (audioName) => {
-    setFileName(audioName);
+    const audioIndex = audiosFile.findIndex((audio) => audio === audioName);
+    setCurrentAudioPlaying(audioIndex);
 
     setAudioTitle('Gestão de áudio, você está ouvindo agora:  ' + audioName);
     audioPlayer.current.play();
@@ -134,7 +124,7 @@ const Uploads = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getAudios = async () => {
       try {
         const {
@@ -186,6 +176,7 @@ const Uploads = () => {
             multiple
             type="file"
           />
+
           <Button
             variant="contained"
             component="span"
@@ -194,6 +185,7 @@ const Uploads = () => {
             Upload
           </Button>
         </label>
+
         <label htmlFor="icon-button-file">
           <Button
             variant="contained"
@@ -204,12 +196,13 @@ const Uploads = () => {
           </Button>
         </label>
 
-        <audio
-          ref={audioPlayer}
-          src={'http://localhost:3005/audio/' + fileName}
-          controls
-          autoPlay
-        />
+        {!!audiosFile.length && (
+          <audio
+            ref={audioPlayer}
+            src={`${config.api}/audio/${audiosFile[currentAudioPlaying]}`}
+            controls
+          />
+        )}
       </Stack>
 
       {audiosFile.map((audio) => (

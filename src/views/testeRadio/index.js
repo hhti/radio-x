@@ -368,7 +368,7 @@ export default function TesteRadio() {
           </Box>
 
           <Card sx={{ overflow: 'hidden' }}>
-            {audios.length && (
+            {!!audios.length && (
               <audio
                 ref={audioPlayer}
                 src={`${config.api}/audio/${audios[currentAudioPlaying]}`}
@@ -456,6 +456,8 @@ export default function TesteRadio() {
                 label="time"
                 onChange={handleChangeTIme}
               >
+                <MenuItem value={2}>2 Minutos</MenuItem>
+                <MenuItem value={10}>10 Minutos</MenuItem>
                 <MenuItem value={20}>20 Minutos</MenuItem>
                 <MenuItem value={30}>30 Minutos</MenuItem>
                 <MenuItem value={40}>40 Minutos</MenuItem>
